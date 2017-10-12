@@ -18,17 +18,24 @@ func (p *Particle) maximumHeight() {
 }
 
 func (p *Particle) timeOfFlight() {
-	a := math.Pow((p.initialHeight * math.Sin(p.theta)), 2)
+	a := math.Pow((p.initialVelocity * math.Sin(p.theta)), 2)
 	b := 2 * p.g * p.initialHeight
 	c := a + b
+	p.flightTime = (math.Sqrt(c) + (p.initialVelocity * math.Sin(p.theta))) / p.g
+}
 
-	p.flightTime = (math.Sqrt(c) + (p.initialHeight * math.Sin(p.theta))) / p.g
+func (p *Particle) maxRange() {
+	if p.flightTime == 0 {
+		p.timeOfFlight()
+	}
+	p.horizontalRange = (p.initialVelocity * math.Cos(p.theta)) * p.flightTime
 }
 
 func main() {
-	yerMaw := Particle{initialVelocity: 10.0, theta: 45.0, initialHeight: 10.0, g: 9.8}
+	yerMaw := Particle{initialVelocity: 10.0, theta: 45.0, g: 9.8}
 	yerMaw.thetaDegrees()
 	yerMaw.maximumHeight()
 	yerMaw.timeOfFlight()
-	fmt.Println(yerMaw.maxHeight, yerMaw.flightTime)
+	yerMaw.maxRange()
+	fmt.Println(yerMaw.maxHeight, yerMaw.flightTime, yerMaw.horizontalRange)
 }
