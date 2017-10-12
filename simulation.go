@@ -3,6 +3,11 @@ package main
 import (
 	"fmt"
 	"math"
+
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/plotutil"
+	"gonum.org/v1/plot/vg"
 )
 
 type Particle struct {
@@ -47,14 +52,37 @@ func (p Particle) path() ([]float64, []float64) {
 	return xs, ys
 }
 
+func (p Particle) pathPlot() {
+	pts := make(plotter.XYs, 100000)
+	for i := 0; float64(i) < 100.0*p.horizontalRange; i++ {
+		pts[i].X = float64(i / 100)
+		pts[i].Y = p.position(float64(i / 100))
+	}
+	pl, err := plot.New()
+	if err != nil {
+		panic(err)
+	}
+	pl.Title.Text = "Bleh"
+	pl.X.Label.Text = "bluh"
+	pl.Y.Label.Text = "blah"
+
+	err = plotutil.AddLinePoints(pl, "First", pts)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := pl.Save(4*vg.Inch, 4*vg.Inch, "points.png"); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	yerMaw := Particle{initialVelocity: 10.0, theta: 45.0, g: 9.8}
 	yerMaw.thetaDegrees()
 	yerMaw.maximumHeight()
 	yerMaw.timeOfFlight()
 	yerMaw.maxRange()
-	x, y := yerMaw.path()
-	fmt.Println(x)
-	fmt.Println("\n\n\n\n")
-	fmt.Println(y)
+	//x, y := yerMaw.path()
+	fmt.Println(yerMaw.maxHeight)
+	yerMaw.pathPlot()
 }
