@@ -53,11 +53,14 @@ func (p Particle) path() ([]float64, []float64) {
 }
 
 func (p Particle) pathPlot() {
-	pts := make(plotter.XYs, 100000)
-	for i := 0; float64(i) < 100.0*p.horizontalRange; i++ {
-		pts[i].X = float64(i / 100)
-		pts[i].Y = p.position(float64(i / 100))
+
+	pts := make(plotter.XYs, int(p.horizontalRange)+2)
+	for i := 0; float64(i) < p.horizontalRange; i++ {
+		pts[i].X = float64(i)
+		pts[i].Y = p.position(float64(i))
 	}
+	pts[int(p.horizontalRange)+1].X = p.horizontalRange
+	pts[int(p.horizontalRange)+1].Y = 0.0
 	pl, err := plot.New()
 	if err != nil {
 		panic(err)
@@ -67,17 +70,26 @@ func (p Particle) pathPlot() {
 	pl.Y.Label.Text = "blah"
 
 	err = plotutil.AddLinePoints(pl, "First", pts)
+	fmt.Println(pts)
 	if err != nil {
 		panic(err)
 	}
-
+	pl.X.Min = 0
+	pl.Y.Min = 0
+	if p.maxHeight > p.horizontalRange {
+		pl.X.Max = pl.Y.Max
+		fmt.Println(pl.X.Max, pl.Y.Max)
+	} else {
+		pl.Y.Max = pl.X.Max
+		fmt.Println(pl.X.Max, pl.Y.Max)
+	}
 	if err := pl.Save(4*vg.Inch, 4*vg.Inch, "points.png"); err != nil {
 		panic(err)
 	}
 }
 
 func main() {
-	yerMaw := Particle{initialVelocity: 10.0, theta: 45.0, g: 9.8}
+	yerMaw := Particle{initialVelocity: 10.0, theta: 45.0, g: 1.6, initialHeight: 10.0}
 	yerMaw.thetaDegrees()
 	yerMaw.maximumHeight()
 	yerMaw.timeOfFlight()
