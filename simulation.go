@@ -1,4 +1,4 @@
-package main
+package GoSim
 
 import (
 	"fmt"
@@ -86,15 +86,4 @@ func (p Particle) pathPlot() {
 	if err := pl.Save(4*vg.Inch, 4*vg.Inch, "points.png"); err != nil {
 		panic(err)
 	}
-}
-
-func main() {
-	yerMaw := Particle{initialVelocity: 10.0, theta: 45.0, g: 1.6, initialHeight: 10.0}
-	yerMaw.thetaDegrees()
-	yerMaw.maximumHeight()
-	yerMaw.timeOfFlight()
-	yerMaw.maxRange()
-	//x, y := yerMaw.path()
-	fmt.Println(yerMaw.maxHeight)
-	yerMaw.pathPlot()
 }
