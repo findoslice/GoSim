@@ -3,7 +3,6 @@ package GoSim
 import (
 	"fmt"
 	"math"
-
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
@@ -12,55 +11,55 @@ import (
 
 type Particle struct {
 	//group particle variables together
-	initialHeight, initialVelocity, finalHeight, finalVelocity, maxHeight, horizontalRange, flightTime, theta, g float64
+	InitialHeight, InitialVelocity, FinalHeight, FinalVelocity, MaxHeight, HorizontalRange, FlightTime, Theta, G float64
 }
 
-func (p *Particle) thetaDegrees() {
-	p.theta = (p.theta / 360) * 2 * math.Pi
+func (p *Particle) ThetaDegrees() {
+	p.Theta = (p.Theta / 360) * 2 * math.Pi
 }
 
-func (p *Particle) maximumHeight() {
-	p.maxHeight = (math.Pow((p.initialVelocity*math.Sin(p.theta)), 2))/(2*p.g) + p.initialHeight
+func (p *Particle) MaximumHeight() {
+	p.MaxHeight = (math.Pow((p.InitialVelocity*math.Sin(p.Theta)), 2))/(2*p.G) + p.InitialHeight
 }
 
-func (p *Particle) timeOfFlight() {
-	a := math.Pow((p.initialVelocity * math.Sin(p.theta)), 2)
-	b := 2 * p.g * p.initialHeight
+func (p *Particle) TimeOfFlight() {
+	a := math.Pow((p.InitialVelocity * math.Sin(p.Theta)), 2)
+	b := 2 * p.G * p.InitialHeight
 	c := a + b
-	p.flightTime = (math.Sqrt(c) + (p.initialVelocity * math.Sin(p.theta))) / p.g
+	p.FlightTime = (math.Sqrt(c) + (p.InitialVelocity * math.Sin(p.Theta))) / p.G
 }
 
-func (p *Particle) maxRange() {
-	if p.flightTime == 0 {
-		p.timeOfFlight()
+func (p *Particle) MaxRange() {
+	if p.FlightTime == 0 {
+		p.TimeOfFlight()
 	}
-	p.horizontalRange = (p.initialVelocity * math.Cos(p.theta)) * p.flightTime
+	p.HorizontalRange = (p.InitialVelocity * math.Cos(p.Theta)) * p.FlightTime
 }
 
-func (p Particle) position(x float64) float64 {
-	y := (x * math.Tan(p.theta)) - ((p.g * math.Pow(x, 2)) / (2 * math.Pow(p.initialVelocity, 2) * math.Pow((math.Cos(p.theta)), 2))) + p.initialHeight
+func (p Particle) Position(x float64) float64 {
+	y := (x * math.Tan(p.Theta)) - ((p.G * math.Pow(x, 2)) / (2 * math.Pow(p.InitialVelocity, 2) * math.Pow((math.Cos(p.Theta)), 2))) + p.InitialHeight
 	return y
 }
 
-func (p Particle) path() ([]float64, []float64) {
+func (p Particle) Path() ([]float64, []float64) {
 	var xs []float64
 	var ys []float64
-	for x := 0.0; x < p.horizontalRange; x += 0.1 {
+	for x := 0.0; x < p.HorizontalRange; x += 0.1 {
 		xs = append(xs, x)
-		ys = append(ys, p.position(x))
+		ys = append(ys, p.Position(x))
 	}
 	return xs, ys
 }
 
-func (p Particle) pathPlot() {
+func (p Particle) PathPlot() {
 
-	pts := make(plotter.XYs, int(p.horizontalRange)+2)
-	for i := 0; float64(i) < p.horizontalRange; i++ {
+	pts := make(plotter.XYs, int(p.HorizontalRange)+2)
+	for i := 0; float64(i) < p.HorizontalRange; i++ {
 		pts[i].X = float64(i)
-		pts[i].Y = p.position(float64(i))
+		pts[i].Y = p.Position(float64(i))
 	}
-	pts[int(p.horizontalRange)+1].X = p.horizontalRange
-	pts[int(p.horizontalRange)+1].Y = 0.0
+	pts[int(p.HorizontalRange)+1].X = p.HorizontalRange
+	pts[int(p.HorizontalRange)+1].Y = 0.0
 	pl, err := plot.New()
 	if err != nil {
 		panic(err)
@@ -76,7 +75,7 @@ func (p Particle) pathPlot() {
 	}
 	pl.X.Min = 0
 	pl.Y.Min = 0
-	if p.maxHeight > p.horizontalRange {
+	if p.MaxHeight > p.HorizontalRange {
 		pl.X.Max = pl.Y.Max
 		fmt.Println(pl.X.Max, pl.Y.Max)
 	} else {
