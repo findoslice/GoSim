@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 package SimGo
+=======
+package main
+>>>>>>> parent of c48b29f... package (kind of) complete
 
 import (
 	"fmt"
@@ -88,6 +92,7 @@ func (p Particle) PathPlot() {
 	}
 }
 
+<<<<<<< HEAD
 func (p Particle) XVelocityDrag(t int) float64 {
 	a := ((p.InitialVelocity) * math.Cos(p.Theta)) * math.Pow(math.E, (-1*(p.G*float64(t))/p.TerminalVelocity))
 	return (a)
@@ -159,3 +164,15 @@ func (p Particle) PathPlotDrag() {
 		panic(err)
 	}
 }
+=======
+func main() {
+	yerMaw := Particle{initialVelocity: 10.0, theta: 45.0, g: 1.6, initialHeight: 10.0}
+	yerMaw.thetaDegrees()
+	yerMaw.maximumHeight()
+	yerMaw.timeOfFlight()
+	yerMaw.maxRange()
+	//x, y := yerMaw.path()
+	fmt.Println(yerMaw.maxHeight)
+	yerMaw.pathPlot()
+}
+>>>>>>> parent of c48b29f... package (kind of) complete
