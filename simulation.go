@@ -1,4 +1,4 @@
-package main
+package SimGo
 
 import (
 	"fmt"
@@ -54,7 +54,6 @@ func (p Particle) Path() ([]float64, []float64) {
 }
 
 func (p Particle) PathPlot() {
-
 	pts := make(plotter.XYs, int(p.HorizontalRange)+2)
 	for i := 0; float64(i) < p.HorizontalRange; i++ {
 		pts[i].X = float64(i)
@@ -111,16 +110,29 @@ func (p Particle) YPositionDrag(t int) float64 {
 
 func (p Particle) PathPlotDrag() {
 
-	pts := make(plotter.XYs, int(p.HorizontalRange)+2)
-	for i := 0; float64(i) < p.HorizontalRange; i++ {
+	a := 0.0
+	b := 0.0
+	time := 0.0
+
+	for i := 0; i < 1000; i++ {
+		a = p.YVelocityDrag(i)
+		if a < b {
+			time = a
+			break
+		}
+		b = p.YPositionDrag(i)
+	}
+
+	pts := make(plotter.XYs, int(time))
+	for i := 0; float64(i) < 2*time+1; i++ {
 		pts[i].X = p.XPositionDrag(i)
 		pts[i].Y = p.YPositionDrag(i)
 		if p.YPositionDrag(i) < 0 {
 			break
 		}
 	}
-	//pts[int(p.HorizontalRange)+1].X = p.HorizontalRange
-	//pts[int(p.HorizontalRange)+1].Y = 0.0
+	pts[int(2*time+1)].X = p.XPositionDrag(int(2.0 * time))
+	pts[int(2*time+1)].Y = 0.0
 	pl, err := plot.New()
 	if err != nil {
 		panic(err)
@@ -146,14 +158,4 @@ func (p Particle) PathPlotDrag() {
 	if err := pl.Save(4*vg.Inch, 4*vg.Inch, "pointsdrag.png"); err != nil {
 		panic(err)
 	}
-}
-
-func main() {
-	tps := Particle{InitialHeight: 10.0, Theta: 45.0, G: 9.8, InitialVelocity: 50.0, TerminalVelocity: 100.0}
-	tps.ThetaDegrees()
-	tps.MaximumHeight()
-	tps.TimeOfFlight()
-	tps.MaxRange()
-	tps.PathPlotDrag()
-	fmt.Println(tps)
 }
