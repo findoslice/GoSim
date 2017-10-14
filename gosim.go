@@ -1,7 +1,6 @@
 package GoSim
 
 import (
-	"fmt"
 	"math"
 
 	"gonum.org/v1/plot"
@@ -10,13 +9,27 @@ import (
 	"gonum.org/v1/plot/vg"
 )
 
+//
+//TODO: Add a Variable expression for G
+//
+
 type Particle struct {
 	//group particle variables together
 	InitialHeight, InitialVelocity, FinalHeight, FinalVelocity, MaxHeight, HorizontalRange, FlightTime, Theta, G float64
 }
 
+func (p *Particle) SetDefaults() {
+	if p.G == 0.0 {
+		p.G = 9.8
+	}
+	p.ThetaDegrees()
+}
+
 func (p *Particle) ThetaDegrees() {
 	p.Theta = (p.Theta / 360) * 2 * math.Pi
+	if math.Abs(p.Theta) > 90.0 {
+		p.Theta = float64(int(p.Theta) % 90)
+	}
 }
 
 func (p *Particle) MaximumHeight() {
@@ -31,7 +44,7 @@ func (p *Particle) TimeOfFlight() {
 }
 
 func (p *Particle) MaxRange() {
-	if p.FlightTime == 0 {
+	if p.FlightTime == 0.0 {
 		p.TimeOfFlight()
 	}
 	p.HorizontalRange = (p.InitialVelocity * math.Cos(p.Theta)) * p.FlightTime
@@ -70,7 +83,6 @@ func (p Particle) PathPlot() {
 	pl.Y.Label.Text = "blah"
 
 	err = plotutil.AddLinePoints(pl, "First", pts)
-	fmt.Println(pts)
 	if err != nil {
 		panic(err)
 	}
@@ -78,10 +90,9 @@ func (p Particle) PathPlot() {
 	pl.Y.Min = 0
 	if p.MaxHeight > p.HorizontalRange {
 		pl.X.Max = pl.Y.Max
-		fmt.Println(pl.X.Max, pl.Y.Max)
 	} else {
 		pl.Y.Max = pl.X.Max
-		fmt.Println(pl.X.Max, pl.Y.Max)
+
 	}
 	if err := pl.Save(4*vg.Inch, 4*vg.Inch, "points.png"); err != nil {
 		panic(err)
