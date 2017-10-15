@@ -8,12 +8,12 @@ import (
 	//"gonum.org/v1/plot/plotter"
 	//"gonum.org/v1/plot/plotutil"
 	//"gonum.org/v1/plot/vg"
-	"math"
 )
 
 type Drag struct {
-	Particle                                             GoSim.Particle
-	TerminalVelocity, xpos, xvel, xacc, ypos, yvel, yacc float64 //these variables are unexported as they should not be edited by the user
+	Particle         GoSim.Particle
+	vector           GoSim.VecParticle //this vector is unexported as it should not be referenced by the user
+	TerminalVelocity float64
 }
 
 func (p *Drag) SetDefaults() {
@@ -34,7 +34,7 @@ func (p *Drag) YPosition() {
 }
 
 func (p *Drag) XVelocity(t float64) {
-	p.xvel = p.Particle.InitialHeight * math.Cos(p.Particle.Theta) * math.Pow(math.E, (-1*p.Particle.G*t)/p.TerminalVelocity)
+	p.vector.Xvel = p.Particle.InitialHeight * math.Cos(p.Particle.Theta) * math.Pow(math.E, (-1*p.Particle.G*t)/p.TerminalVelocity)
 }
 
 func (p *Drag) YVelocity() {
@@ -42,9 +42,9 @@ func (p *Drag) YVelocity() {
 }
 
 func (p *Drag) XAcceleration() {
-	p.xacc = -1 * p.Particle.G * (p.xvel / p.TerminalVelocity)
+	p.vector.Xacc = -1 * p.Particle.G * (p.vector.Xvel / p.TerminalVelocity)
 }
 
 func (p *Drag) YAcceleration() {
-	p.yacc = -1 * p.Particle.G * (1 - (p.xvel / p.TerminalVelocity))
+	p.vector.Yacc = -1 * p.Particle.G * (1 - (p.vector.Yvel / p.TerminalVelocity))
 }

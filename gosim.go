@@ -18,6 +18,10 @@ type Particle struct {
 	InitialHeight, InitialVelocity, FinalHeight, FinalVelocity, MaxHeight, HorizontalRange, FlightTime, Theta, G float64
 }
 
+type VecParticle struct {
+	Xpos, Ypos, Xvel, Yvel, Xacc, Yacc float64
+}
+
 func (p *Particle) SetDefaults() {
 	if p.G == 0.0 {
 		p.G = 9.8
@@ -66,23 +70,41 @@ func (p Particle) Path() ([]float64, []float64) {
 }
 
 func (p Particle) PathPlot() {
-
-	pts := make(plotter.XYs, int(p.HorizontalRange)+2)
-	for i := 0; float64(i) < p.HorizontalRange; i++ {
-		pts[i].X = float64(i)
-		pts[i].Y = p.Position(float64(i))
+	n := 1.0
+	if p.HorizontalRange < 1 {
+		n = 100.0
+	} else if p.HorizontalRange < 2 {
+		n = 40.0
+	} else if p.HorizontalRange < 5 {
+		n = 10.0
+	} else if p.HorizontalRange < 10 {
+		n = 5.0
+	} else if p.HorizontalRange < 20 {
+		n = 3.0
+	} else if p.HorizontalRange > 10000 {
+		n = 0.1
+	} else if p.HorizontalRange > 100000 {
+		n = 0.00000001
+	} else {
+		n = 1.0
 	}
-	pts[int(p.HorizontalRange)+1].X = p.HorizontalRange
-	pts[int(p.HorizontalRange)+1].Y = 0.0
+
+	pts := make(plotter.XYs, int(n*p.HorizontalRange)+2)
+	for i := 0; float64(i) < n*p.HorizontalRange; i++ {
+		pts[i].X = float64(i) / float64(n)
+		pts[i].Y = p.Position(float64(i) / float64(n))
+	}
+	pts[int(n*p.HorizontalRange)+1].X = p.HorizontalRange
+	pts[int(n*p.HorizontalRange)+1].Y = 0.0
 	pl, err := plot.New()
 	if err != nil {
 		panic(err)
 	}
-	pl.Title.Text = "Bleh"
-	pl.X.Label.Text = "bluh"
-	pl.Y.Label.Text = "blah"
+	pl.Title.Text = "Trajectory of Kristel's Chalk"
+	pl.X.Label.Text = "Horizontal Displacement"
+	pl.Y.Label.Text = "Height"
 
-	err = plotutil.AddLinePoints(pl, "First", pts)
+	err = plotutil.AddLinePoints(pl, "Chalk", pts)
 	if err != nil {
 		panic(err)
 	}
@@ -92,9 +114,9 @@ func (p Particle) PathPlot() {
 		pl.X.Max = pl.Y.Max
 	} else {
 		pl.Y.Max = pl.X.Max
-
 	}
-	if err := pl.Save(4*vg.Inch, 4*vg.Inch, "points.png"); err != nil {
+	pl.Add(plotter.NewGrid())
+	if err := pl.Save(8*vg.Inch, 8*vg.Inch, "points.png"); err != nil {
 		panic(err)
 	}
 }
