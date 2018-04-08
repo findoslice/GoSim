@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"math"
-	//"time"
 
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
@@ -16,6 +15,7 @@ const G = 6.674e-11
 type Satellite struct { //Each satellite variable represents one particle
 	Mass, radius float64
 	Coords, Force, Velocity Vector
+	Name string 
 }
 
 type System struct { //only one System struct should exist as this contains information about entire system
@@ -102,70 +102,62 @@ func (ps *System) Update(){
 }
 
 func (ps System) Plot() {
-	//n := 1.0
-	/*if p.HorizontalRange < 1 {
-		n = 100.0
-	} else if p.HorizontalRange < 2 {
-		n = 40.0
-	} else if p.HorizontalRange < 5 {
-		n = 10.0
-	} else if p.HorizontalRange < 10 {
-		n = 5.0
-	} else if p.HorizontalRange < 20 {
-		n = 3.0
-	} else if p.HorizontalRange > 10000 {
-		n = 0.1
-	} else if p.HorizontalRange > 100000 {
-		n = 0.00000001
-	} else {
-		n = 1.0
-	}*/
-
-	pts := make(plotter.XYs, 500000)
-	pts2 := make(plotter.XYs, 500000)
-	for i := 0; float64(i) < 500000; i++ {
-		ps.Update()
-		pts[i].X = ps.Satellites[1].Coords.X
-		pts[i].Y = ps.Satellites[1].Coords.Y
-
-		pts2[i].X = ps.Satellites[0].Coords.X
-		pts2[i].Y = ps.Satellites[0].Coords.Y
+	points := make([]plotter.XYs, len(ps.Satellites))
+	for i := range points{
+		points[i] = make(plotter.XYs, 500000)
 	}
+
 	pl, err := plot.New()
 	if err != nil {
 		panic(err)
 	}
-	pl.Title.Text = "ISS trajectory"
+
+	pl.X.Min = 0
+	pl.Y.Min = 0
+	pl.X.Max = 0
+	pl.Y.Max = 0
+
+	for i := 0; float64(i) < 500000; i++ {
+		ps.Update()
+
+		for j,el := range ps.Satellites{
+			points[j][i].X = el.Coords.X
+			points[j][i].Y = el.Coords.Y
+			if (points[j][i].X > pl.X.Max){
+				pl.X.Max = 1.2*points[j][i].X
+			}
+			if (points[j][i].X < pl.X.Min){
+				pl.X.Min = 1.2*points[j][i].X
+			}
+			if (points[j][i].Y > pl.Y.Max){
+				pl.Y.Max = 1.2*points[j][i].Y
+			}
+			if (points[j][i].Y < pl.Y.Min){
+				pl.Y.Min = 1.2*points[j][i].Y
+			}
+		}
+	}
+	pl.Title.Text = "Satellites and shit"
 	pl.X.Label.Text = "X"
 	pl.Y.Label.Text = "Y"
 
-	err = plotutil.AddLinePoints(pl, "ISS", pts)
-	if err != nil {
-		panic(err)
+	for i,el := range ps.Satellites{
+		err = plotutil.AddLinePoints(pl, el.Name, points[i])
+		if err != nil {
+			panic(err)
+		}
 	}
-	err = plotutil.AddLinePoints(pl, "Earth", pts2)
-	if err != nil {
-		panic(err)
-	}
-	pl.X.Min = -10e+3
-	pl.Y.Min = -10e+3
-	pl.X.Max = 10e+3
-	pl.Y.Max = 10e+3
-	/*if p.MaxHeight > p.HorizontalRange {
-		pl.X.Max = pl.Y.Max
-	} else {
-		pl.Y.Max = pl.X.Max
-	}*/
 	pl.Add(plotter.NewGrid())
-	if err := pl.Save(50*vg.Inch, 50*vg.Inch, "points.png"); err != nil {
+	if err := pl.Save(20*vg.Inch, 20*vg.Inch, "points.png"); err != nil {
 		panic(err)
 	}
 }
 
 func main() {
-	sat1 := Satellite{Mass: 417289000000000000000, Coords: Vector{X: 0, Y: 0}, Velocity: Vector{X:0, Y:0}}
-	sat2 := Satellite{Mass: 417289000000000000000, Coords: Vector{X: 6e3, Y: 0}, Velocity: Vector{X:0,Y:30}}
-	sys := System{Satellites: []Satellite{sat1, sat2}}
+	sat1 := Satellite{Mass: 1.9891e+30, Coords: Vector{X: -149.6e+9, Y: 0}, Velocity: Vector{X:0, Y:0}, Name: "Sun"} //sun
+	sat2 := Satellite{Mass: 5.972e+24, Coords: Vector{X: 0, Y: 0}, Velocity: Vector{X:0,Y:30000}, Name: "Earth"} //earth
+	sat3 := Satellite{Mass:7.3476731e+22, Coords: Vector{X:384403000, Y:0}, Velocity: Vector{X:0,Y:31000}, Name: "Moon"} //moon
+	sys := System{Satellites: []Satellite{sat1, sat2, sat3}}
 	sys.Plot()
 
 }
